@@ -1,0 +1,393 @@
+Riemann-Roch theorem, trace formula and localizations
+=====================================================
+
+.. image:: images/get_started_sphinx.png
+   :width: 600
+
+.. code:: ipython3
+
+    load("moment.sage")
+
+
+Examples of finite subgroups of :math:`SU(V)` with :math:`M_4(G, V)=2` 
+
+- :math:`G=PSL(2, \mathbf{F}_7)`
+
+.. code:: ipython3
+
+    G = PSL(2, GF(7))
+    irrep= G.irreducible_characters()
+    c1 = irrep[1]
+    c2 = irrep[2]
+    
+    abs_moment(G, 4, c1)
+    abs_moment(G, 4, c2)
+
+
+
+
+.. parsed-literal::
+
+    2.00000000000000
+
+
+
+This can be confirmed by a direct decomposition of
+:math:`\mathrm{End}(V)=V\otimes V^{\vee}=c_1\otimes c_2`
+
+.. code:: ipython3
+
+    decompose(c1*c2, G)
+
+
+.. parsed-literal::
+
+    (1, c_1)
+    (1, c_6)
+
+
+-  :math:`G = SU(4, \mathbf{F}_2)`
+
+.. code:: ipython3
+
+    G = SU(4, GF(2))
+    irrep= G.irreducible_characters()
+    c1 = irrep[1]
+    c2 = irrep[2]
+    
+    abs_moment(G, 4, c1)
+
+
+
+
+.. parsed-literal::
+
+    2
+
+
+
+Notice that a direct computation of the moments is slow since
+:math:`|SU(4, \mathbf{F}_2)|=25920`, which is too big. However, a
+decomposition of :math:`\mathrm{End}(V)` gives the answer easily.
+
+.. code:: ipython3
+
+    decompose(c1*c2, G)
+
+
+.. parsed-literal::
+
+    (1, c_1)
+    (1, c_10)
+
+
+.. code:: ipython3
+
+    H = CyclicPermutationGroup(4)
+    H.order()
+
+
+
+
+.. parsed-literal::
+
+    4
+
+
+
+.. code:: ipython3
+
+    G = PermutationGroup(['(1,2,3,4)', '(5,6,7,8)'])
+
+.. code:: ipython3
+
+    G.order()
+
+
+
+
+.. parsed-literal::
+
+    16
+
+
+
+.. code:: ipython3
+
+    val = []
+    for ele in G:
+        if ele.order() == 1:
+            val.append(22)
+        if ele.order() == 2:
+            val.append(6)
+        if ele.order() == 4:
+            val.append(2)
+
+
+.. code:: ipython3
+
+    val
+
+
+
+
+.. parsed-literal::
+
+    [22, 6, 2, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+
+
+
+.. code:: ipython3
+
+    chi = ClassFunction(G, val)
+
+.. code:: ipython3
+
+    irrep = G.irreducible_characters()
+
+.. code:: ipython3
+
+    irrep[0]
+
+
+
+
+.. parsed-literal::
+
+    Character of Permutation Group with generators [(5,6,7,8), (1,2,3,4)]
+
+
+
+.. code:: ipython3
+
+    chi
+
+
+
+
+.. parsed-literal::
+
+    Character of Permutation Group with generators [(5,6,7,8), (1,2,3,4)]
+
+
+
+.. code:: ipython3
+
+    chi.values()
+
+
+
+
+.. parsed-literal::
+
+    [22, 6, 2, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+
+
+
+.. code:: ipython3
+
+    def pair(a,b):
+        ans = 0
+        for g in G:
+            ans += a(g)*conjugate(b(g))
+        return ans/16
+
+.. code:: ipython3
+
+    for k, rho in enumerate(irrep):
+        multiplicity= pair(chi, rho)
+        print(f"({multiplicity}, chi_{k})")
+
+
+.. parsed-literal::
+
+    (4, chi_0)
+    (1, chi_1)
+    (1, chi_2)
+    (1, chi_3)
+    (1, chi_4)
+    (1, chi_5)
+    (1/2*zeta4 + 3/2, chi_6)
+    (-1/2*zeta4 + 3/2, chi_7)
+    (1, chi_8)
+    (1, chi_9)
+    (1/2*zeta4 + 3/2, chi_10)
+    (-1/2*zeta4 + 3/2, chi_11)
+    (1/2*zeta4 + 1, chi_12)
+    (-1/2*zeta4 + 1, chi_13)
+    (3/2, chi_14)
+    (3/2, chi_15)
+
+
+.. code:: ipython3
+
+    for ele in G:
+        print(f"({ele.order()},{ele},{irrep[6](ele)}, {chi(ele)})")
+
+
+.. parsed-literal::
+
+    (1,(),1, 22)
+    (2,(5,7)(6,8),1, 2)
+    (4,(5,8,7,6),1, 2)
+    (4,(5,6,7,8),1, 6)
+    (2,(1,3)(2,4),-1, 2)
+    (2,(1,3)(2,4)(5,7)(6,8),-1, 2)
+    (4,(1,3)(2,4)(5,8,7,6),-1, 2)
+    (4,(1,3)(2,4)(5,6,7,8),-1, 2)
+    (4,(1,4,3,2),zeta4, 2)
+    (4,(1,4,3,2)(5,7)(6,8),zeta4, 2)
+    (4,(1,4,3,2)(5,8,7,6),zeta4, 2)
+    (4,(1,4,3,2)(5,6,7,8),zeta4, 2)
+    (4,(1,2,3,4),-zeta4, 6)
+    (4,(1,2,3,4)(5,7)(6,8),-zeta4, 2)
+    (4,(1,2,3,4)(5,8,7,6),-zeta4, 2)
+    (4,(1,2,3,4)(5,6,7,8),-zeta4, 6)
+
+
+.. code:: ipython3
+
+    def well(b):
+        ans = 0
+        for g in G:
+            if g.order() == 1:
+                ans += 22*conjugate(b(g))
+            if g.order() == 2:
+                ans += 6*conjugate(b(g))
+            if g.order() == 4:
+                ans += 2*conjugate(b(g))
+        return ans/16
+
+.. code:: ipython3
+
+    for k, rho in enumerate(irrep):
+        multiplicity= well(rho)
+        print(f"({multiplicity}, chi_{k})")
+
+
+.. parsed-literal::
+
+    (4, chi_0)
+    (2, chi_1)
+    (2, chi_2)
+    (2, chi_3)
+    (1, chi_4)
+    (1, chi_5)
+    (1, chi_6)
+    (1, chi_7)
+    (1, chi_8)
+    (1, chi_9)
+    (1, chi_10)
+    (1, chi_11)
+    (1, chi_12)
+    (1, chi_13)
+    (1, chi_14)
+    (1, chi_15)
+
+
+.. code:: ipython3
+
+    for rep in irrep:
+        print(rep.values())
+
+
+.. parsed-literal::
+
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, -1, -1, 1, -1, 1]
+    [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1]
+    [1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1]
+    [1, -1, 1, -1, -zeta4, zeta4, -zeta4, zeta4, -1, 1, -1, 1, zeta4, -zeta4, zeta4, -zeta4]
+    [1, -1, 1, -1, zeta4, -zeta4, zeta4, -zeta4, -1, 1, -1, 1, -zeta4, zeta4, -zeta4, zeta4]
+    [1, 1, 1, 1, -zeta4, -zeta4, -zeta4, -zeta4, -1, -1, -1, -1, zeta4, zeta4, zeta4, zeta4]
+    [1, 1, 1, 1, zeta4, zeta4, zeta4, zeta4, -1, -1, -1, -1, -zeta4, -zeta4, -zeta4, -zeta4]
+    [1, -zeta4, -1, zeta4, -1, zeta4, 1, -zeta4, 1, -zeta4, -1, zeta4, -1, zeta4, 1, -zeta4]
+    [1, zeta4, -1, -zeta4, -1, -zeta4, 1, zeta4, 1, zeta4, -1, -zeta4, -1, -zeta4, 1, zeta4]
+    [1, -zeta4, -1, zeta4, 1, -zeta4, -1, zeta4, 1, -zeta4, -1, zeta4, 1, -zeta4, -1, zeta4]
+    [1, zeta4, -1, -zeta4, 1, zeta4, -1, -zeta4, 1, zeta4, -1, -zeta4, 1, zeta4, -1, -zeta4]
+    [1, -zeta4, -1, zeta4, -zeta4, -1, zeta4, 1, -1, zeta4, 1, -zeta4, zeta4, 1, -zeta4, -1]
+    [1, zeta4, -1, -zeta4, zeta4, -1, -zeta4, 1, -1, -zeta4, 1, zeta4, -zeta4, 1, zeta4, -1]
+    [1, -zeta4, -1, zeta4, zeta4, 1, -zeta4, -1, -1, zeta4, 1, -zeta4, -zeta4, -1, zeta4, 1]
+    [1, zeta4, -1, -zeta4, -zeta4, 1, zeta4, -1, -1, -zeta4, 1, zeta4, zeta4, -1, -zeta4, 1]
+
+
+.. code:: ipython3
+
+    def tensor(b):
+        ans = 0
+        for g in G:
+            if g.order() == 1:
+                ans += (22*23)*conjugate(b(g))
+            if g.order() == 2:
+                ans += (42)*conjugate(b(g))
+            if g.order() == 4:
+                ans += 6*conjugate(b(g))
+        return ans/16
+
+.. code:: ipython3
+
+    for k, rho in enumerate(irrep):
+        multiplicity= tensor(rho)
+        print(f"({multiplicity}, chi_{k})")
+
+
+.. parsed-literal::
+
+    (44, chi_0)
+    (38, chi_1)
+    (38, chi_2)
+    (38, chi_3)
+    (29, chi_4)
+    (29, chi_5)
+    (29, chi_6)
+    (29, chi_7)
+    (29, chi_8)
+    (29, chi_9)
+    (29, chi_10)
+    (29, chi_11)
+    (29, chi_12)
+    (29, chi_13)
+    (29, chi_14)
+    (29, chi_15)
+
+
+.. code:: ipython3
+
+    %%macaulay2
+    
+    loadPackage "Schubert2"
+    X = abstractVariety(2,QQ[r,D,d_1,K,c_2,d_2,Degrees=>{0,3:1,2:2}])
+    X.TangentBundle = abstractSheaf(X,Rank=>2,ChernClass=>1-K+c_2)
+    
+    todd(X)
+    chi OO_X
+
+
+.. parsed-literal::
+
+    Schubert2
+    
+    Package
+    
+    X
+    
+    an abstract variety of dimension 2
+    
+    a sheaf
+    
+    an abstract sheaf of rank 2 on X
+    
+        1      1 2    1
+    1 - -K + (--K  + --c )
+        2     12     12 2
+    
+    QQ[r, D, d , K, c , d ]
+              1      2   2
+    
+              1 2    1
+    integral(--K  + --c )
+             12     12 2
+    
+    Expression of class Adjacent
+
+
